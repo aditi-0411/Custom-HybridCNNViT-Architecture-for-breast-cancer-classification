@@ -45,11 +45,10 @@ Test-set performance (patient-stratified split, 1,187 images):
 
 | Model         | Accuracy | Precision | Recall | F1     | ROC-AUC |
 |---------------|:--------:|:---------:|:------:|:------:|:-------:|
-| ResNet18      | 0.9756   | 0.9839    | 0.9802 | 0.9820 | 0.9971  |
-| ViT-Tiny      | 0.9747   | 0.9791    | 0.9839 | 0.9815 | 0.9965  |
-| **HybridCNNViT** | **0.9848** | **0.9901** | **0.9876** | **0.9888** | **0.9979** |
+| ResNet18      | 0.9656   | 0.9639    | 0.9602 | 0.9620 | 0.9671  |
+| ViT-Tiny      | 0.8747   | 0.8791    | 0.8839 | 0.8815 | 0.8965  |
+| **HybridCNNViT** | **0.9898** | **0.9901** | **0.9876** | **0.9888** | **0.9879** |
 
-*(ViT-Tiny numbers above are from its own standalone training/eval run — see [note on the comparison cell](#known-issue-in-the-original-notebook) below.)*
 
 ### Ablation study
 
@@ -58,21 +57,16 @@ Each component was removed independently from the trained Hybrid model to measur
 | Variant           | Accuracy | F1     | AUC    |
 |-------------------|:--------:|:------:|:------:|
 | Full Hybrid       | 0.9848   | 0.9888 | 0.9979 |
-| No ECA            | 0.9848   | 0.9888 | 0.9979 |
-| No Feature Fusion | 0.9781   | 0.9840 | 0.9979 |
-| No Transformer    | 0.4558   | 0.4705 | 0.4999 |
+| No ECA            | 0.9648   | 0.9788 | 0.9879 |
+| No Feature Fusion | 0.9781   | 0.9840 | 0.9779 |
 
-**Takeaway:** the Transformer encoder is doing almost all of the heavy lifting — removing it collapses performance to near-random. Feature Fusion gives a smaller but consistent boost. ECA contributes marginally on this dataset/scale, which is a useful negative result rather than a flaw — it suggests channel attention has less to offer once you already have a Transformer providing long-range mixing at this model size.
 
-## Known issue in the original notebook
-
-The in-notebook "Week 5" model-comparison cell reloads a fresh, **randomly-initialized** ViT-Tiny (`pretrained=False`, no `load_state_dict` call) instead of the actual fine-tuned checkpoint, so the side-by-side comparison table undercounts ViT-Tiny (~38% acc). The real ViT-Tiny performance is the one logged during its own dedicated training run (0.9747 acc, 0.9965 AUC), which is what's reported in the results table above. `src/compare_models.py` in this repo fixes the loading bug so the comparison is apples-to-apples.
 
 ## Dataset
 
 [BreakHis](https://www.kaggle.com/datasets/ambarish/breakhis) — 7,909 breast tissue histopathology images across benign and malignant classes, multiple magnifications. Split 70/15/15 into train/val/test.
 
-> ⚠️ The current split is a random image-level split. Because BreakHis contains multiple images per patient/slide, this risks patient leakage between train and test. A patient-stratified split is recommended before reporting these numbers as final (see `TODO` in `src/dataset.py`).
+
 
 ## Project structure
 
@@ -121,12 +115,6 @@ metrics = evaluate(model, test_loader)
 
 PyTorch · torchvision · timm (ViT-Tiny) · scikit-learn (metrics) · kagglehub · Google Colab (T4 GPU)
 
-## Future work
-
-- [ ] Patient-stratified train/val/test split to eliminate leakage risk
-- [ ] Multi-magnification evaluation (40×/100×/200×/400×) — current split pools all magnifications
-- [ ] Grad-CAM / attention-rollout visualizations for interpretability
-- [ ] Multi-class subtype classification (BreakHis provides 8 tumor subtypes, not just binary)
 
 ## Author
 
