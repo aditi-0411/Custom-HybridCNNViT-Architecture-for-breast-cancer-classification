@@ -97,19 +97,6 @@ pip install -r requirements.txt
 
 Designed to run on a free Colab T4 GPU. Dataset is pulled automatically via `kagglehub`.
 
-## Usage
-
-```python
-from src.dataset import get_dataloaders
-from src.models.hybrid_cnn_vit import HybridCNNViT
-from src.train_utils import train_model, evaluate
-
-train_loader, val_loader, test_loader = get_dataloaders(batch_size=16)
-
-model = HybridCNNViT(embed_dim=192, depth=2, heads=3).to(device)
-train_model(model, train_loader, val_loader, epochs=10)
-metrics = evaluate(model, test_loader)
-```
 
 ## Tech stack
 
